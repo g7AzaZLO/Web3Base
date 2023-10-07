@@ -7,7 +7,7 @@ from models import TokenAmount
 
 
 class Client:
-    #default_abi = read_json(TOKEN_ABI)
+    # default_abi = read_json(TOKEN_ABI)
 
     def __init__(
             self,
@@ -132,16 +132,23 @@ class Client:
             print(f"{self.address} | approve | {token_address} for spender {spender}")
             return False
 
+
 def check_native_balance(address, rpc):
-    web3 = Web3(Web3.HTTPProvider(rpc))
-    address = Web3.to_checksum_address(address)
-    balance = web3.eth.get_balance(address)
-    ether_balance = Web3.from_wei(balance,"ether")
-    return float(ether_balance)
+    try:
+        web3 = Web3(Web3.HTTPProvider(rpc))
+        address = Web3.to_checksum_address(address)
+        balance = web3.eth.get_balance(address)
+        ether_balance = Web3.from_wei(balance, "ether")
+        return float(ether_balance)
+    except Exception as e:
+        print(f"ERROR: {e}")
+
 
 def check_price_in_usdt(token):
-    responce = requests.get(USDT_PRICE_URL+token)
-    data = responce.json()
-    price_in_usdt = data["data"]["rates"]["USD"]
-    return float(price_in_usdt)
-
+    try:
+        responce = requests.get(USDT_PRICE_URL + token)
+        data = responce.json()
+        price_in_usdt = data["data"]["rates"]["USD"]
+        return float(price_in_usdt)
+    except Exception as e:
+        print(f"ERROR: {e}")
