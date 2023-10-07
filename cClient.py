@@ -1,15 +1,13 @@
 import requests
-
+from data.config import *
 from web3 import Web3
-from typing import Optional
 
 from utils import read_json
-from data.config import TOKEN_ABI
 from models import TokenAmount
 
 
 class Client:
-    default_abi = read_json(TOKEN_ABI)
+    #default_abi = read_json(TOKEN_ABI)
 
     def __init__(
             self,
@@ -94,7 +92,7 @@ class Client:
             print(f"{self.address} | unexpected error in <check_tx> function: {err}")
             return False
 
-    def approve(self, token_address: str, spender: str, amount: Optional[TokenAmount] = None):
+    def approve(self, token_address: str, spender: str, amount: TokenAmount | None = None):
         contract = self.w3.eth.contract(
             address=Web3.to_checksum_address(token_address),
             abi=Client.default_abi
@@ -108,7 +106,7 @@ class Client:
                                     ))
         )
 
-    def check_approve(self, token_address: str, spender: str, amount: Optional[TokenAmount] = None) -> bool:
+    def check_approve(self, token_address: str, spender: str, amount: TokenAmount | None = None) -> bool:
         print(f"{self.address} | approve | start approve {token_address} for spender {spender}")
         decimals = self.get_decimals(contract_address=token_address)
         balance = TokenAmount(
@@ -133,3 +131,17 @@ class Client:
         if not self.check_tx(tx_hash=tx_hash):
             print(f"{self.address} | approve | {token_address} for spender {spender}")
             return False
+
+def check_native_balance(address, rpc):
+    web3 = Web3(Web3.HTTPProvider(rpc))
+    address = Web3.to_checksum_address(address)
+    balance = web3.eth.get_balance(address)
+    ether_balance = Web3.from_wei(balance,"ether")
+    return float(ether_balance)
+
+def check_price_in_usdt(token):
+    responce = requests.get(USDT_PRICE_URL+token)
+    data = responce.json()
+    price_in_usdt = data["data"]["rates"]["USD"]
+    return float(price_in_usdt)
+
